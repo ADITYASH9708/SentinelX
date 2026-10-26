@@ -13,7 +13,7 @@ function MLThreatAnalysis() {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/api/analyze"
+        "/api/analyze"
       );
 
       if (!response.ok) {
@@ -99,7 +99,7 @@ function App() {
     async function loadEvents() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/events"
+          "/api/events"
         );
 
         if (!response.ok) {
