@@ -1,4 +1,3 @@
-                           
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
@@ -12,9 +11,7 @@ function MLThreatAnalysis() {
     setError("");
 
     try {
-      const response = await fetch(
-        "/api/analyze"
-      );
+      const response = await fetch("/api/analyze");
 
       if (!response.ok) {
         throw new Error("Could not get analysis from backend.");
@@ -53,9 +50,7 @@ function MLThreatAnalysis() {
       </button>
 
       {error && (
-        <p style={{ color: "#ff7777", marginTop: 12 }}>
-          {error}
-        </p>
+        <p style={{ color: "#ff7777", marginTop: 12 }}>{error}</p>
       )}
 
       {analysis && (
@@ -64,7 +59,9 @@ function MLThreatAnalysis() {
             Result:{" "}
             <span
               className={
-                analysis.status === "SUSPICIOUS" ? "risk" : "result success"
+                analysis.status === "SUSPICIOUS"
+                  ? "risk"
+                  : "result success"
               }
             >
               {analysis.status}
@@ -98,21 +95,16 @@ function App() {
 
     async function loadEvents() {
       try {
-        const response = await fetch(
-          "/api/events"
-        );
+        const response = await fetch("/api/events");
 
         if (!response.ok) {
-          throw new Error("Backend could not read Windows events.");
+          throw new Error("Could not load demonstration events.");
         }
 
         const data = await response.json();
 
         const realLogs = (data.events || []).map((event) => {
-          const match = String(event.time || "").match(/\d+/);
-          const date = match
-            ? new Date(Number(match[0]))
-            : new Date(event.time);
+          const date = new Date(event.time);
 
           const message = event.message || "";
           const accountMatch = message.match(
@@ -122,18 +114,18 @@ function App() {
             /Source Network Address:\s*([^\r\n]+)/i
           );
 
-          const rawUser = accountMatch?.[1]?.trim();
-          const rawIP = ipMatch?.[1]?.trim();
+          const rawUser = event.user || accountMatch?.[1]?.trim();
+          const rawIP = event.ip || ipMatch?.[1]?.trim();
 
           const user =
             rawUser && rawUser !== "-" && rawUser !== "SYSTEM"
               ? rawUser
-              : "Windows account";
+              : "Demo account";
 
           const ip =
             rawIP && rawIP !== "-" && rawIP !== "::1"
               ? rawIP
-              : "Local machine";
+              : "Demo IP";
 
           return {
             id: event.recordId ?? `${event.id}-${event.time}`,
@@ -142,7 +134,7 @@ function App() {
               : date.toLocaleTimeString("en-IN"),
             user,
             ip,
-            result: event.result,
+            result: event.result || "UNKNOWN",
           };
         });
 
@@ -197,13 +189,13 @@ function App() {
       "time,user,ip,result",
       ...filteredLogs.map(
         (log) =>
-          `${log.time},${log.user},${log.ip},${log.result}`
+          `"${log.time}","${log.user}","${log.ip}","${log.result}"`
       ),
     ].join("\n");
 
     const link = document.createElement("a");
     const url = URL.createObjectURL(
-      new Blob([content], { type: "text/csv" })
+      new Blob([content], { type: "text/csv;charset=utf-8;" })
     );
 
     link.href = url;
@@ -251,7 +243,7 @@ function App() {
 
         <div className="sidebar-bottom">
           <div className="status-dot" />
-          LOCAL ANALYSIS MODE
+          CLOUD DEMO MODE
           <p>SentinelX v1.0.0</p>
         </div>
       </aside>
@@ -263,7 +255,7 @@ function App() {
           </div>
           <div className="top-right">
             <span className="online-dot" />
-            WINDOWS SECURITY LOGS
+            DEMO SECURITY EVENTS
             <div className="avatar">SX</div>
           </div>
         </header>
@@ -301,7 +293,7 @@ function App() {
               <strong>Connection error</strong>
               <p>{error}</p>
               <small>
-                Ensure the Python backend is running on port 5000.
+                This dashboard uses the SentinelX demo API deployed with the site.
               </small>
             </div>
           )}
@@ -311,7 +303,7 @@ function App() {
               <Stat
                 label="TOTAL EVENTS"
                 value={logs.length}
-                detail="Windows authentication records"
+                detail="Demo authentication records"
                 icon="▤"
               />
               <Stat
@@ -342,7 +334,7 @@ function App() {
               <div className="section-heading">
                 <div>
                   <h2>Authentication activity</h2>
-                  <p>Currently loaded Windows events</p>
+                  <p>Currently loaded demonstration events</p>
                 </div>
                 <span className="live-pill">
                   ● {loading ? "LOADING" : "DATA LOADED"}
@@ -403,7 +395,7 @@ function App() {
                       ? "Recent authentication events"
                       : "Log Explorer"}
                   </h2>
-                  <p>Search and filter Windows login records</p>
+                  <p>Search and filter demonstration login records</p>
                 </div>
                 <button
                   className="button-secondary"
@@ -467,7 +459,7 @@ function App() {
                         <tr>
                           <td colSpan="5" className="empty">
                             {loading
-                              ? "Loading Windows events..."
+                              ? "Loading demo events..."
                               : "No matching events found."}
                           </td>
                         </tr>
@@ -479,7 +471,7 @@ function App() {
                 <div className="table-footer">
                   Showing {filteredLogs.length} of {logs.length} events
                   <span>
-                    Rule-based detection · Windows event logs
+                    Rule-based detection · Demo event data
                   </span>
                 </div>
               </div>
@@ -515,7 +507,7 @@ function App() {
               ) : (
                 <div className="panel empty-alert">
                   {loading
-                    ? "Loading Windows events..."
+                    ? "Loading demo events..."
                     : "No accounts currently meet the failed-login threshold."}
                 </div>
               )}
@@ -524,7 +516,7 @@ function App() {
 
           <footer>
             SENTINELX <span>·</span> DEFENSIVE SECURITY ANALYTICS{" "}
-            <span>·</span> WINDOWS EVENT DATA
+            <span>·</span> DEMONSTRATION EVENT DATA
           </footer>
         </section>
       </main>
