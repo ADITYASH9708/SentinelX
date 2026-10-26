@@ -9,3 +9,4 @@ __pycache__/
 .env.*
 !.env.example
 *.py[cod]
+backend/__pycache__/
